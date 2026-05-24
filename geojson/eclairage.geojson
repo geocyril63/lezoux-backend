@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.3861123,
+          45.8418211
+        ]
+      },
+      "properties": {
+        "category": "Éclairage",
+        "priority": "Important",
+        "description": "test",
+        "author": "Cyril Glorieux",
+        "status": "nouveau"
+      }
+    }
+  ]
+}

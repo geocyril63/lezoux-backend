@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.3803,
+          45.8265
+        ]
+      },
+      "properties": {
+        "category": "Voirie",
+        "priority": "Critique",
+        "description": "Nid de poule important",
+        "author": "Cyril Glorieux",
+        "status": "nouveau"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.3875650035611047,
+          45.84369185370979
+        ]
+      },
+      "properties": {
+        "category": "Voirie",
+        "priority": "Important",
+        "description": "test 2",
+        "author": "Cyril Glorieux",
+        "status": "nouveau"
+      }
+    }
+  ]
+}
