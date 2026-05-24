@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import json
 
@@ -29,37 +30,87 @@ REPO_URL = (
 CATEGORY_FILES = {
 
     "Voirie":
-        "geojson/voirie.geojson",
+        "voirie.geojson",
 
     "Éclairage":
-        "geojson/eclairage.geojson",
+        "eclairage.geojson",
 
     "Dépôts sauvages":
-        "geojson/depots_sauvages.geojson",
+        "depots_sauvages.geojson",
 
     "Mobilier urbain":
-        "geojson/mobilier_urbain.geojson",
+        "mobilier_urbain.geojson",
 
     "Espaces verts":
-        "geojson/espaces_verts.geojson",
+        "espaces_verts.geojson",
 }
 
 
-def push_to_github():
+def push_to_github(
+    file_name,
+    geojson,
+):
 
     try:
 
         print("")
         print("===================================")
-        print("PUSH GITHUB...")
+        print("CLONAGE REPO GITHUB")
         print("===================================")
+
+        repo_dir = "/tmp/lezoux-data"
+
+        if os.path.exists(repo_dir):
+
+            shutil.rmtree(
+                repo_dir
+            )
 
         subprocess.run(
 
             [
                 "git",
+                "clone",
+                REPO_URL,
+                repo_dir,
+            ],
+
+            check=True,
+        )
+
+        print("REPO CLONE")
+
+        target_file = os.path.join(
+
+            repo_dir,
+            file_name,
+        )
+
+        with open(
+            target_file,
+            "w",
+            encoding="utf-8",
+        ) as f:
+
+            json.dump(
+
+                geojson,
+                f,
+
+                ensure_ascii=False,
+
+                indent=2,
+            )
+
+        print("FICHIER GEOJSON MIS A JOUR")
+
+        subprocess.run(
+
+            [
+                "git",
+                "-C",
+                repo_dir,
                 "config",
-                "--global",
                 "user.email",
                 "lezouxreferents@gmail.com",
             ],
@@ -71,8 +122,9 @@ def push_to_github():
 
             [
                 "git",
+                "-C",
+                repo_dir,
                 "config",
-                "--global",
                 "user.name",
                 "Lezoux Referents",
             ],
@@ -84,19 +136,8 @@ def push_to_github():
 
             [
                 "git",
-                "remote",
-                "set-url",
-                "origin",
-                REPO_URL,
-            ],
-
-            check=True,
-        )
-
-        subprocess.run(
-
-            [
-                "git",
+                "-C",
+                repo_dir,
                 "add",
                 ".",
             ],
@@ -108,6 +149,8 @@ def push_to_github():
 
             [
                 "git",
+                "-C",
+                repo_dir,
                 "commit",
                 "-m",
                 "Ajout signalement",
@@ -120,9 +163,9 @@ def push_to_github():
 
             [
                 "git",
+                "-C",
+                repo_dir,
                 "push",
-                "origin",
-                "main",
             ],
 
             check=True,
@@ -166,16 +209,42 @@ def report():
 
         category = data["category"]
 
-        file_path = CATEGORY_FILES[
+        file_name = CATEGORY_FILES[
             category
         ]
 
         print(
-            f"FICHIER CIBLE : {file_path}"
+            f"FICHIER CIBLE : {file_name}"
+        )
+
+        repo_dir = "/tmp/local-working-copy"
+
+        if os.path.exists(repo_dir):
+
+            shutil.rmtree(
+                repo_dir
+            )
+
+        subprocess.run(
+
+            [
+                "git",
+                "clone",
+                REPO_URL,
+                repo_dir,
+            ],
+
+            check=True,
+        )
+
+        target_file = os.path.join(
+
+            repo_dir,
+            file_name,
         )
 
         with open(
-            file_path,
+            target_file,
             "r",
             encoding="utf-8",
         ) as f:
@@ -220,27 +289,14 @@ def report():
             feature,
         )
 
-        with open(
-            file_path,
-            "w",
-            encoding="utf-8",
-        ) as f:
-
-            json.dump(
-
-                geojson,
-                f,
-
-                ensure_ascii=False,
-
-                indent=2,
-            )
-
         print(
             "POINT GEOJSON AJOUTE"
         )
 
-        push_to_github()
+        push_to_github(
+            file_name,
+            geojson,
+        )
 
         print("===================================")
         print("FIN TRAITEMENT")
@@ -253,8 +309,10 @@ def report():
 
     except Exception as e:
 
+        print("")
         print("ERREUR BACKEND :")
         print(e)
+        print("")
 
         return jsonify({
 
