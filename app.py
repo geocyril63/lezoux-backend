@@ -1,6 +1,10 @@
 import json
 
-from flask import Flask, request, jsonify
+from flask import (
+    Flask,
+    request,
+    jsonify,
+)
 
 from flask_cors import CORS
 
@@ -26,83 +30,128 @@ CATEGORY_FILES = {
         "geojson/espaces_verts.geojson",
 }
 
+
 @app.route("/")
 def home():
 
     return "Lezoux Referents API OK"
 
-@app.route("/report", methods=["POST"])
+
+@app.route(
+    "/report",
+    methods=["POST"],
+)
 def report():
 
-    data = request.json
+    print("")
+    print("===================================")
+    print("NOUVEAU SIGNALEMENT RECU")
+    print("===================================")
 
-    category = data["category"]
+    try:
 
-    file_path = CATEGORY_FILES[category]
+        data = request.json
 
-    with open(
-        file_path,
-        "r",
-        encoding="utf-8",
-    ) as f:
+        print("DONNEES RECUES :")
+        print(data)
 
-        geojson = json.load(f)
+        category = data["category"]
 
-    feature = {
+        file_path = CATEGORY_FILES[
+            category
+        ]
 
-        "type": "Feature",
-
-        "geometry": {
-
-            "type": "Point",
-
-            "coordinates": [
-
-                data["longitude"],
-                data["latitude"],
-            ],
-        },
-
-        "properties": {
-
-            "category":
-                data["category"],
-
-            "priority":
-                data["priority"],
-
-            "description":
-                data["description"],
-
-            "author":
-                data["author"],
-
-            "status":
-                "nouveau",
-        },
-    }
-
-    geojson["features"].append(
-        feature,
-    )
-
-    with open(
-        file_path,
-        "w",
-        encoding="utf-8",
-    ) as f:
-
-        json.dump(
-            geojson,
-            f,
-            ensure_ascii=False,
-            indent=2,
+        print(
+            f"FICHIER CIBLE : {file_path}"
         )
 
-    return jsonify({
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8",
+        ) as f:
 
-        "success": True,
-    })
+            geojson = json.load(f)
+
+        feature = {
+
+            "type": "Feature",
+
+            "geometry": {
+
+                "type": "Point",
+
+                "coordinates": [
+
+                    data["longitude"],
+                    data["latitude"],
+                ],
+            },
+
+            "properties": {
+
+                "category":
+                    data["category"],
+
+                "priority":
+                    data["priority"],
+
+                "description":
+                    data["description"],
+
+                "author":
+                    data["author"],
+
+                "status":
+                    "nouveau",
+            },
+        }
+
+        geojson["features"].append(
+            feature,
+        )
+
+        with open(
+            file_path,
+            "w",
+            encoding="utf-8",
+        ) as f:
+
+            json.dump(
+
+                geojson,
+                f,
+
+                ensure_ascii=False,
+
+                indent=2,
+            )
+
+        print(
+            "POINT GEOJSON AJOUTE"
+        )
+
+        print("===================================")
+        print("FIN TRAITEMENT")
+        print("===================================")
+
+        return jsonify({
+
+            "success": True,
+        })
+
+    except Exception as e:
+
+        print("ERREUR BACKEND :")
+        print(e)
+
+        return jsonify({
+
+            "success": False,
+
+            "error": str(e),
+        }), 500
+
 
 if __name__ == "__main__":
 
